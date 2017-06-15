@@ -3,18 +3,25 @@ services:
   shib-service-example:
     image: uscdev/shib-service-example
     ports:
-      - 80:80
-      - 443:443
+      - 8986:80
+      - 8987:443
     environment:
       - SERVER_NAME=${SERVER_NAME}
     networks:
-      web-bus:
+      - proxy
     secrets:
       - apache.crt
       - apache.key
       - sp-key.pem
       - sp-cert.pem
     deploy:
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.httpsOnly=true
+        - com.df.port=443
+        - com.df.serviceDomain=shib-service-example.docker.usc.edu
+        - com.df.sslVerifyNone=true
       replicas: 1
       update_config:
         parallelism: 1
@@ -22,9 +29,9 @@ services:
       restart_policy:
         condition: on-failure
 networks:
-  web-bus:
+  proxy:
     external:
-      name: web-bus
+      name: proxy
 secrets:
   apache.crt:
     external: true
